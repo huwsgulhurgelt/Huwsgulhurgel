@@ -42,6 +42,7 @@
       border: none;
       border-radius: 6px;
       font-size: 16px;
+      cursor: pointer;
     }
 
     a {
@@ -59,15 +60,39 @@
     <h1>Хүргэгч бүртгүүлэх</h1>
 
     <label>Утасны дугаар</label>
-    <input type="text" placeholder="9911XXXX">
+    <input type="text" id="phone" placeholder="9911XXXX">
 
     <label>Тайлбар</label>
-    <textarea rows="4" placeholder="Хэдэн кг зөөх боломжтой, ямар өдөр боломжтой гэх мэт"></textarea>
+    <textarea id="desc" rows="4" placeholder="Хэдэн кг зөөх боломжтой, ямар өдөр боломжтой гэх мэт"></textarea>
 
-    <button>Бүртгүүлэх</button>
+    <button onclick="saveCarrier()">Бүртгүүлэх</button>
 
     <a href="index.html">← Буцах</a>
   </div>
+
+  <script>
+    function saveCarrier() {
+      const phone = document.getElementById("phone").value;
+      const desc = document.getElementById("desc").value;
+
+      if (phone === "" || desc === "") {
+        alert("Бүх талбарыг бөглөнө үү");
+        return;
+      }
+
+      const carrier = {
+        phone: phone,
+        desc: desc
+      };
+
+      let carriers = JSON.parse(localStorage.getItem("carriers")) || [];
+      carriers.push(carrier);
+      localStorage.setItem("carriers", JSON.stringify(carriers));
+
+      alert("Амжилттай бүртгэгдлээ!");
+      window.location.href = "carriers.html";
+    }
+  </script>
 
 </body>
 </html>
