@@ -2,103 +2,83 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8">
-  <title>Хүргэгч бүртгүүлэх</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .form-box {
-      background: white;
-      padding: 60px;
-      border-radius: 20px;
-      text-align: center;
-      width: 700px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      margin-bottom: 40px;
-      font-size: 72px;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 24px;
-      margin: 20px 0;
-      font-size: 32px;
-      border-radius: 12px;
-      border: 2px solid #ccc;
-    }
-
-    button {
-      padding: 15px;
-      width: 100%;
-      font-size: 20px;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      margin-top: 30px;
-    }
-
-    a {
-      display: block;
-      margin-top: 40px;
-      color: #2196F3;
-      text-decoration: none;
-    }
-  </style>
+  <title>Боломжит хүргэгчид</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<h1>Боломжит хүргэгчид</h1>
 
-<div class="form-box">
-  <h1>Хүргэгч бүртгүүлэх</h1>
+<div id="list"></div>
+<a href="index.html">← Буцах</a>
 
-  <input type="text" id="phone" placeholder="Утасны дугаар">
-  <textarea id="description" rows="4" placeholder="Тайлбар: кг, өдөр, боломж"></textarea>
-  <input type="password" id="pin" placeholder="Нууц PIN">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-  <button id="submitBtn">Бүртгүүлэх</button>
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD_2GnarpqIcFj6e6Qop5fxOljjbhuDOy0",
+  authDomain: "huwsgulhurgelt.firebaseapp.com",
+  databaseURL: "https://huwsgulhurgelt-default-rtdb.firebaseio.com/",
+  projectId: "huwsgulhurgelt",
+  storageBucket: "huwsgulhurgelt.firebasestorage.app",
+  messagingSenderId: "274801313992",
+  appId: "1:274801313992:web:1449e8135030e0c6ba7dfd",
+  measurementId: "G-WLFV2M24LC"
+};
 
-  <a href="index.html">← Буцах</a>
-</div>
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-<script>
-document.getElementById("submitBtn").addEventListener("click", function() {
-  const phone = document.getElementById("phone").value.trim();
-  const description = document.getElementById("description").value.trim();
-  const pin = document.getElementById("pin").value.trim();
+const list = document.getElementById('list');
+const carriersRef = ref(database,'carriers');
 
-  if (!phone || !description || !pin) {
-    alert("Бүх талбарыг бөглөнө үү!");
-    return;
+// Show all carriers
+onValue(carriersRef, snapshot => {
+  const data = snapshot.val();
+  list.innerHTML = '';
+  if(data){
+    Object.keys(data).forEach(key=>{
+      const c = data[key];
+      const div = document.createElement('div');
+      div.className='card';
+      div.innerHTML=`
+        <p><strong>Утас:</strong> ${c.phone}</p>
+        <p><strong>Тайлбар:</strong> ${c.description}</p>
+        <button onclick="editCarrier('${key}')">✏️ Засах</button>
+        <button onclick="deleteCarrier('${key}')">🗑️ Устгах</button>
+      `;
+      list.appendChild(div);
+    });
+  } else {
+    list.innerHTML="<p style='text-align:center;color:gray;'>Хоосон байна</p>";
   }
-
-  // Load existing carriers
-  let carriers = JSON.parse(localStorage.getItem("carriers")) || [];
-
-  // Add new carrier
-  carriers.push({
-    phone: phone,
-    description: description,
-    pin: pin
-  });
-
-  // Save back to localStorage
-  localStorage.setItem("carriers", JSON.stringify(carriers));
-
-  alert("Амжилттай бүртгэгдлээ! PIN-ээ мартуузай!");
-  window.location.href = "carriers.html";
 });
-</script>
 
+// Delete carrier (PIN-protected)
+window.deleteCarrier = function(id){
+  const pin = prompt("Нууц PIN оруулна уу:");
+  get(ref(database,'carriers/'+id)).then(snap=>{
+    if(snap.val().pin===pin){
+      remove(ref(database,'carriers/'+id));
+    } else {
+      alert("PIN буруу байна");
+    }
+  });
+};
+
+// Edit carrier (PIN-protected)
+window.editCarrier = function(id){
+  const pin = prompt("Нууц PIN оруулна уу:");
+  get(ref(database,'carriers/'+id)).then(snap=>{
+    const data = snap.val();
+    if(data.pin===pin){
+      const newPhone = prompt("Шинэ утас:", data.phone);
+      const newDesc = prompt("Шинэ тайлбар:", data.description);
+      update(ref(database,'carriers/'+id), { phone: newPhone||data.phone, description: newDesc||data.description });
+    } else alert("PIN буруу байна");
+  });
+};
+</script>
 </body>
 </html>
