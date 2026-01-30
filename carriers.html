@@ -4,69 +4,68 @@
   <meta charset="UTF-8">
   <title>Боломжит хүргэгчид</title>
   <style>
-    body { font-family: Arial; background:#f9f9f9; padding:20px; }
-    .card { background:white; padding:15px; margin:15px auto; max-width:400px;
-            border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,.1); }
-    button { margin-right:10px; }
-    a { display:block; text-align:center; margin-top:30px; color:#2196F3; text-decoration:none; }
+    body {
+      font-family: Arial;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 400px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    }
+
+    button {
+      margin-right: 10px;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      color: #2196F3;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
 
 <h1 style="text-align:center;">Боломжит хүргэгчид</h1>
+
 <div id="list"></div>
+
 <a href="index.html">← Буцах</a>
 
 <script>
-let carriers = JSON.parse(localStorage.getItem("carriers")) || [];
-const list = document.getElementById("list");
+  const carriers = JSON.parse(localStorage.getItem("carriers")) || [];
+  const list = document.getElementById("list");
 
-function render() {
-  list.innerHTML = "";
-  if (carriers.length === 0) {
-    list.innerHTML = "<p style='text-align:center;color:gray;'>Хоосон байна</p>";
-    return;
+  function render() {
+    list.innerHTML = "";
+
+    if (carriers.length === 0) {
+      list.innerHTML = "<p style='text-align:center;color:gray;'>Хоосон байна</p>";
+      return;
+    }
+
+    carriers.forEach((c, index) => {
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        <p><strong>Утас:</strong> ${c.phone}</p>
+        <p><strong>Тайлбар:</strong> ${c.description}</p>
+      `;
+
+      list.appendChild(div);
+    });
   }
 
-  carriers.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <p><strong>Утас:</strong> ${c.phone}</p>
-      <p><strong>Тайлбар:</strong> ${c.desc}</p>
-      <button onclick="editCarrier(${c.id})">✏️ Засах</button>
-      <button onclick="deleteCarrier(${c.id})">🗑️ Устгах</button>
-    `;
-    list.appendChild(div);
-  });
-}
-
-function deleteCarrier(id) {
-  const pin = prompt("PIN оруулна уу:");
-  carriers = carriers.filter(c => !(c.id === id && c.pin === pin));
-  localStorage.setItem("carriers", JSON.stringify(carriers));
   render();
-}
-
-function editCarrier(id) {
-  const pin = prompt("PIN оруулна уу:");
-  const carrier = carriers.find(c => c.id === id && c.pin === pin);
-  if (!carrier) {
-    alert("PIN буруу байна");
-    return;
-  }
-
-  const newPhone = prompt("Шинэ утас:", carrier.phone);
-  const newDesc = prompt("Шинэ тайлбар:", carrier.desc);
-
-  carrier.phone = newPhone;
-  carrier.desc = newDesc;
-
-  localStorage.setItem("carriers", JSON.stringify(carriers));
-  render();
-}
-
-render();
 </script>
 
 </body>
