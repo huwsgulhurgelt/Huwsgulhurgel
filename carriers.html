@@ -23,6 +23,12 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
+    .empty {
+      text-align: center;
+      margin-top: 40px;
+      color: gray;
+    }
+
     a {
       display: block;
       text-align: center;
@@ -36,17 +42,28 @@
 
   <h1>Боломжит хүргэгчид</h1>
 
-  <div class="card">
-    <p><strong>Утас:</strong> 9911XXXX</p>
-    <p><strong>Тайлбар:</strong> Хөнгөн ачаа зөөж өгнө</p>
-  </div>
-
-  <div class="card">
-    <p><strong>Утас:</strong> 8812XXXX</p>
-    <p><strong>Тайлбар:</strong> Амралтын өдрүүдэд боломжтой</p>
-  </div>
+  <div id="list"></div>
 
   <a href="index.html">← Буцах</a>
+
+  <script>
+    const list = document.getElementById("list");
+    const carriers = JSON.parse(localStorage.getItem("carriers")) || [];
+
+    if (carriers.length === 0) {
+      list.innerHTML = "<p class='empty'>Одоогоор хүргэгч бүртгэгдээгүй байна</p>";
+    } else {
+      carriers.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <p><strong>Утас:</strong> ${c.phone}</p>
+          <p><strong>Тайлбар:</strong> ${c.desc}</p>
+        `;
+        list.appendChild(div);
+      });
+    }
+  </script>
 
 </body>
 </html>
