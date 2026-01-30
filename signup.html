@@ -2,18 +2,24 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8">
-  <title>Боломжит хүргэгчид</title>
+  <title>Хүргэгч бүртгүүлэх</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Боломжит хүргэгчид</h1>
+<h1>Хүргэгч бүртгүүлэх</h1>
 
-<div id="list"></div>
+<div class="form">
+  <input type="text" id="phone" placeholder="Утас">
+  <input type="text" id="desc" placeholder="Тайлбар">
+  <input type="password" id="pin" placeholder="PIN">
+  <button id="registerBtn">Бүртгүүлэх</button>
+</div>
+
 <a href="index.html">← Буцах</a>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -30,54 +36,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-const list = document.getElementById('list');
-const carriersRef = ref(database,'carriers');
+// Register button
+document.getElementById('registerBtn').onclick = () => {
+  const phone = document.getElementById('phone').value;
+  const desc = document.getElementById('desc').value;
+  const pin = document.getElementById('pin').value;
 
-// Show all carriers
-onValue(carriersRef, snapshot => {
-  const data = snapshot.val();
-  list.innerHTML = '';
-  if(data){
-    Object.keys(data).forEach(key=>{
-      const c = data[key];
-      const div = document.createElement('div');
-      div.className='card';
-      div.innerHTML=`
-        <p><strong>Утас:</strong> ${c.phone}</p>
-        <p><strong>Тайлбар:</strong> ${c.description}</p>
-        <button onclick="editCarrier('${key}')">✏️ Засах</button>
-        <button onclick="deleteCarrier('${key}')">🗑️ Устгах</button>
-      `;
-      list.appendChild(div);
-    });
+  if(phone && desc && pin){
+    const carriersRef = ref(database,'carriers');
+    const newRef = push(carriersRef);
+    set(newRef,{phone, description: desc, pin});
+    alert("Бүртгэл амжилттай!");
+    document.getElementById('phone').value='';
+    document.getElementById('desc').value='';
+    document.getElementById('pin').value='';
   } else {
-    list.innerHTML="<p style='text-align:center;color:gray;'>Хоосон байна</p>";
+    alert("Бүх талбарыг бөглөнө үү!");
   }
-});
-
-// Delete carrier (PIN-protected)
-window.deleteCarrier = function(id){
-  const pin = prompt("Нууц PIN оруулна уу:");
-  get(ref(database,'carriers/'+id)).then(snap=>{
-    if(snap.val().pin===pin){
-      remove(ref(database,'carriers/'+id));
-    } else {
-      alert("PIN буруу байна");
-    }
-  });
-};
-
-// Edit carrier (PIN-protected)
-window.editCarrier = function(id){
-  const pin = prompt("Нууц PIN оруулна уу:");
-  get(ref(database,'carriers/'+id)).then(snap=>{
-    const data = snap.val();
-    if(data.pin===pin){
-      const newPhone = prompt("Шинэ утас:", data.phone);
-      const newDesc = prompt("Шинэ тайлбар:", data.description);
-      update(ref(database,'carriers/'+id), { phone: newPhone||data.phone, description: newDesc||data.description });
-    } else alert("PIN буруу байна");
-  });
 };
 </script>
 </body>
