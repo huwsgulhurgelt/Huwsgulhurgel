@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <title>Боломжит хүргэгчид</title>
   <style>
-    body { font-family: Arial; background:#f9f9f9; padding:20px; }
-    .card { background:white; padding:15px; margin:15px auto; max-width:400px;
-            border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,.1); }
-    button { margin-right:10px; padding:8px 12px; font-size:16px; }
+    body { font-family: Arial; background:#f9f9f9; padding:40px; }
+    .card { background:white; padding:30px; margin:30px auto; max-width:800px;
+            border-radius:16px; box-shadow:0 4px 10px rgba(0,0,0,.1); }
+    button { margin-right:20px; padding:8px 24px; font-size:32px; }
     a { display:block; text-align:center; margin-top:30px; color:#2196F3; text-decoration:none; }
   </style>
 </head>
@@ -42,8 +42,8 @@ function render() {
     div.innerHTML = `
       <p><strong>Утас:</strong> ${c.phone}</p>
       <p><strong>Тайлбар:</strong> ${c.description}</p>
-      <button onclick="editCarrier(${index})">✏️ Засах</button>
-      <button onclick="deleteCarrier(${index})">🗑️ Устгах</button>
+      <button onclick="editCarrier(${index})"> Засах</button>
+      <button onclick="deleteCarrier(${index})"> Устгах</button>
     `;
     list.appendChild(div);
   });
