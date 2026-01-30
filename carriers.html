@@ -3,85 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <title>Боломжит хүргэгчид</title>
-  <style>
-    body { font-family: Arial; background:#f9f9f9; padding:40px; }
-    .card { background:white; padding:30px; margin:30px auto; max-width:800px;
-            border-radius:16px; box-shadow:0 4px 10px rgba(0,0,0,.1); }
-    button { margin-right:20px; padding:8px 24px; font-size:32px; }
-    a { display:block; text-align:center; margin-top:30px; color:#2196F3; text-decoration:none; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<h1>Боломжит хүргэгчид</h1>
 
-<h1 style="text-align:center;">Боломжит хүргэгчид</h1>
 <div id="list"></div>
 <a href="index.html">← Буцах</a>
 
-<script>
-let carriers = JSON.parse(localStorage.getItem("carriers")) || [];
-const list = document.getElementById("list");
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-// Migrate old posts without PIN
-carriers = carriers.map(c => {
-  if (!c.pin) c.pin = "0000"; // old posts get default PIN
-  return c;
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD_2GnarpqIcFj6e6Qop5fxOljjbhuDOy0",
+  authDomain: "huwsgulhurgelt.firebaseapp.com",
+  databaseURL: "https://huwsgulhurgelt-default-rtdb.firebaseio.com/",
+  projectId: "huwsgulhurgelt",
+  storageBucket: "huwsgulhurgelt.firebasestorage.app",
+  messagingSenderId: "274801313992",
+  appId: "1:274801313992:web:1449e8135030e0c6ba7dfd",
+  measurementId: "G-WLFV2M24LC"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+const list = document.getElementById('list');
+const carriersRef = ref(database,'carriers');
+
+// Show all carriers
+onValue(carriersRef, snapshot => {
+  const data = snapshot.val();
+  list.innerHTML = '';
+  if(data){
+    Object.keys(data).forEach(key=>{
+      const c = data[key];
+      const div = document.createElement('div');
+      div.className='card';
+      div.innerHTML=`
+        <p><strong>Утас:</strong> ${c.phone}</p>
+        <p><strong>Тайлбар:</strong> ${c.description}</p>
+        <button onclick="editCarrier('${key}')">✏️ Засах</button>
+        <button onclick="deleteCarrier('${key}')">🗑️ Устгах</button>
+      `;
+      list.appendChild(div);
+    });
+  } else {
+    list.innerHTML="<p style='text-align:center;color:gray;'>Хоосон байна</p>";
+  }
 });
-localStorage.setItem("carriers", JSON.stringify(carriers));
 
-function render() {
-  list.innerHTML = "";
-  if (carriers.length === 0) {
-    list.innerHTML = "<p style='text-align:center;color:gray;'>Хоосон байна</p>";
-    return;
-  }
-
-  carriers.forEach((c, index) => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <p><strong>Утас:</strong> ${c.phone}</p>
-      <p><strong>Тайлбар:</strong> ${c.description}</p>
-      <button onclick="editCarrier(${index})"> Засах</button>
-      <button onclick="deleteCarrier(${index})"> Устгах</button>
-    `;
-    list.appendChild(div);
+// Delete carrier (PIN-protected)
+window.deleteCarrier = function(id){
+  const pin = prompt("Нууц PIN оруулна уу:");
+  get(ref(database,'carriers/'+id)).then(snap=>{
+    if(snap.val().pin===pin){
+      remove(ref(database,'carriers/'+id));
+    } else {
+      alert("PIN буруу байна");
+    }
   });
-}
+};
 
-function deleteCarrier(index) {
+// Edit carrier (PIN-protected)
+window.editCarrier = function(id){
   const pin = prompt("Нууц PIN оруулна уу:");
-  if (!pin) return;
-
-  if (carriers[index].pin === pin) {
-    carriers.splice(index,1);
-    localStorage.setItem("carriers", JSON.stringify(carriers));
-    render();
-  } else {
-    alert("PIN буруу байна");
-  }
-}
-
-function editCarrier(index) {
-  const pin = prompt("Нууц PIN оруулна уу:");
-  if (!pin) return;
-
-  if (carriers[index].pin === pin) {
-    const newPhone = prompt("Шинэ утас:", carriers[index].phone);
-    const newDesc = prompt("Шинэ тайлбар:", carriers[index].description);
-
-    if (newPhone) carriers[index].phone = newPhone;
-    if (newDesc) carriers[index].description = newDesc;
-
-    localStorage.setItem("carriers", JSON.stringify(carriers));
-    render();
-  } else {
-    alert("PIN буруу байна");
-  }
-}
-
-render();
+  get(ref(database,'carriers/'+id)).then(snap=>{
+    const data = snap.val();
+    if(data.pin===pin){
+      const newPhone = prompt("Шинэ утас:", data.phone);
+      const newDesc = prompt("Шинэ тайлбар:", data.description);
+      update(ref(database,'carriers/'+id), { phone: newPhone||data.phone, description: newDesc||data.description });
+    } else alert("PIN буруу байна");
+  });
+};
 </script>
-
 </body>
 </html>
