@@ -6,16 +6,16 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Боломжит хүргэгчид</h1>
+<header>Боломжит хүргэгчид</header>
 
-<div id="list"></div>
-<a href="index.html">← Буцах</a>
+<div class="container" id="list"></div>
+
+<a href="index.html" class="back-link">← Буцах</a>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase, ref, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD_2GnarpqIcFj6e6Qop5fxOljjbhuDOy0",
   authDomain: "huwsgulhurgelt.firebaseapp.com",
@@ -33,7 +33,6 @@ const database = getDatabase(app);
 const list = document.getElementById('list');
 const carriersRef = ref(database,'carriers');
 
-// Show all carriers
 onValue(carriersRef, snapshot => {
   const data = snapshot.val();
   list.innerHTML = '';
@@ -45,29 +44,26 @@ onValue(carriersRef, snapshot => {
       div.innerHTML=`
         <p><strong>Утас:</strong> ${c.phone}</p>
         <p><strong>Тайлбар:</strong> ${c.description}</p>
-        <button onclick="editCarrier('${key}')">✏️ Засах</button>
-        <button onclick="deleteCarrier('${key}')">🗑️ Устгах</button>
+        <div class="card-buttons">
+          <button onclick="editCarrier('${key}')">✏️ Засах</button>
+          <button onclick="deleteCarrier('${key}')">🗑️ Устгах</button>
+        </div>
       `;
       list.appendChild(div);
     });
   } else {
-    list.innerHTML="<p style='text-align:center;color:gray;'>Хоосон байна</p>";
+    list.innerHTML="<p class='empty'>Хоосон байна</p>";
   }
 });
 
-// Delete carrier (PIN-protected)
 window.deleteCarrier = function(id){
   const pin = prompt("Нууц PIN оруулна уу:");
   get(ref(database,'carriers/'+id)).then(snap=>{
-    if(snap.val().pin===pin){
-      remove(ref(database,'carriers/'+id));
-    } else {
-      alert("PIN буруу байна");
-    }
+    if(snap.val().pin===pin){ remove(ref(database,'carriers/'+id)); }
+    else alert("PIN буруу байна");
   });
 };
 
-// Edit carrier (PIN-protected)
 window.editCarrier = function(id){
   const pin = prompt("Нууц PIN оруулна уу:");
   get(ref(database,'carriers/'+id)).then(snap=>{
